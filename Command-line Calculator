@@ -1,0 +1,115 @@
+import java.util.Scanner;
+
+class Operations {
+    public void add(double b, double c) {
+        System.out.println("Your answer is " + (b + c));
+    }
+
+    public void sub(double b, double c) {
+        System.out.println("Your answer is " + (b - c));
+    }
+
+    public void mul(double b, double c) {
+        System.out.println("Your answer is " + (b * c));
+    }
+
+    public void div(double b, double c) {
+        if (c == 0) {
+            System.out.println("undefined");
+        } else {
+            System.out.println("Your answer is " + (b / c));
+        }
+    }
+
+    public void power(double b, double c) {
+        System.out.println("Your answer is " + Math.pow(b, c));
+    }
+
+    public void sqrt(double b) {
+        if (b < 0)
+            System.out.println("Square Root cannot be found for a negative number");
+        else
+            System.out.println("Your answer is " + (Math.sqrt(b)));
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        Operations o = new Operations();
+
+        while (true) {
+            System.out.println("Enter the choice of operation (or type 'exit' to quit): ");
+            System.out.println("1->Addition");
+            System.out.println("2->Subtraction");
+            System.out.println("3->Multiplication");
+            System.out.println("4->Division");
+            System.out.println("5->Exponent");
+            System.out.println("6->Square Root");
+
+            String input = sc.next();
+
+            if (input.equalsIgnoreCase("exit")) {
+                System.out.println("Exiting the calculator.");
+                break;
+            }
+
+            int a;
+            try {
+                a = Integer.parseInt(input);
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a valid operation or 'exit'.");
+                continue;
+            }
+
+            if (a < 1 || a > 6) {
+                System.out.println("Invalid choice. Please enter a number between 1 and 6 or 'exit'.");
+                continue;
+            }
+
+            System.out.println("Enter the first number: ");
+            double b = sc.nextDouble();
+
+            double c;
+            switch (a) {
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                case 5:
+                    System.out.println("Enter the second number: ");
+                    c = sc.nextDouble();
+                    break;
+                case 6:
+                    c = 0; 
+                    break;
+                default:
+                    System.out.println("Invalid choice");
+                    continue;
+            }
+
+            switch (a) {
+                case 1:
+                    o.add(b, c);
+                    break;
+                case 2:
+                    o.sub(b, c);
+                    break;
+                case 3:
+                    o.mul(b, c);
+                    break;
+                case 4:
+                    o.div(b, c);
+                    break;
+                case 5:
+                    o.power(b, c);
+                    break;
+                case 6:
+                    o.sqrt(b);
+                    break;
+                default:
+                    System.out.println("Invalid choice");
+            }
+        }
+    }
+}
