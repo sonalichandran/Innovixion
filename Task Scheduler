@@ -1,0 +1,154 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+
+public class SwingTaskManager {
+
+    private static final ArrayList<Task> tasks = new ArrayList<>();
+    private static DefaultListModel<String> taskListModel;
+
+    public static void main(String[] args) {
+        JFrame frame = new JFrame("Swing Task Manager");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(500, 500);
+
+        taskListModel = new DefaultListModel<>();
+        JList<String> taskList = new JList<>(taskListModel);
+        taskList.setCellRenderer(new TaskListCellRenderer());
+
+        JButton addButton = new JButton("Add Task");
+        addButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                addTask(frame);
+            }
+        });
+
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.add(new JScrollPane(taskList), BorderLayout.CENTER);
+        panel.add(addButton, BorderLayout.SOUTH);
+        panel.setBackground(Color.WHITE);
+
+        frame.getContentPane().add(panel);
+        frame.setVisible(true);
+    }
+
+    private static void addTask(JFrame frame) {
+        JTextField titleField = new JTextField();
+        JTextField dateField = new JTextField();
+        JTextField priorityField = new JTextField();
+
+        JPanel inputPanel = new JPanel(new GridLayout(3, 2));
+        inputPanel.add(new JLabel("Title:"));
+        inputPanel.add(titleField);
+        inputPanel.add(new JLabel("Due Date (YYYY-MM-DD):"));
+        inputPanel.add(dateField);
+        inputPanel.add(new JLabel("Priority (1-5):"));
+        inputPanel.add(priorityField);
+
+        int result = JOptionPane.showConfirmDialog(frame, inputPanel, "Add Task", JOptionPane.OK_CANCEL_OPTION);
+
+        if (result == JOptionPane.OK_OPTION) {
+            try {
+                String title = titleField.getText();
+                LocalDate dueDate = LocalDate.parse(dateField.getText());
+                int priority = Integer.parseInt(priorityField.getText());
+
+                Task task = new Task(title, dueDate, priority, false); 
+                tasks.add(task);
+                updateTaskList();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(frame, "Invalid input. Please enter valid values.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    private static void updateTaskList() {
+        taskListModel.clear();
+
+       
+        Collections.sort(tasks, Comparator.comparing(Task::getDueDate).thenComparing(Task::getPriority));
+
+        for (Task task : tasks) {
+            taskListModel.addElement(task.toString());
+        }
+    }
+
+    private static class TaskListCellRenderer extends JPanel implements ListCellRenderer<String> {
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public Component getListCellRendererComponent(JList<? extends String> list, String value, int index,
+                                                      boolean isSelected, boolean cellHasFocus) {
+            removeAll();
+            setLayout(new GridLayout(2, 1));
+            setBorder(BorderFactory.createLineBorder(Color.BLACK));
+            setBackground(Color.WHITE);
+
+            JTextArea taskText = new JTextArea(value);
+            taskText.setEditable(false);
+            taskText.setBackground(Color.WHITE);
+            taskText.setForeground(Color.BLACK);
+            add(taskText);
+
+            JCheckBox statusCheckBox = new JCheckBox("Completed", tasks.get(index).isCompleted());
+            statusCheckBox.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    tasks.get(index).setCompleted(statusCheckBox.isSelected());
+                    updateTaskList();
+                }
+            });
+            statusCheckBox.setBackground(Color.WHITE);
+            statusCheckBox.setForeground(Color.BLACK);
+            add(statusCheckBox);
+
+            return this;
+        }
+    }
+
+    private static class Task {
+        private final String title;
+        private final LocalDate dueDate;
+        private final int priority;
+        private boolean completed;
+
+        public Task(String title, LocalDate dueDate, int priority, boolean completed) {
+            this.title = title;
+            this.dueDate = dueDate;
+            this.priority = priority;
+            this.completed = completed;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public LocalDate getDueDate() {
+            return dueDate;
+        }
+
+        public int getPriority() {
+            return priority;
+        }
+
+        public boolean isCompleted() {
+            return completed;
+        }
+
+        public void setCompleted(boolean completed) {
+            this.completed = completed;
+        }
+
+        @Override
+        public String toString() {
+            String status = completed ? "[Completed]" : "[Not Completed]";
+            return title + "\n(Due: " + dueDate + ", Priority: " + priority + ") " + status;
+        }
+    }
+}
